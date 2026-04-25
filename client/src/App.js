@@ -41,47 +41,56 @@ function App() {
   return (
     <Router>
       <div className="App">
-        <Header />
-        <main className="main-content">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/products" element={<Products />} />
-            <Route path="/products/:id" element={<ProductDetail />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/projects" element={<Projects />} />
-            <Route path="/projects/:id" element={<ProjectDetail />} />
-            <Route path="/commitment" element={<Commitment />} />
-            <Route path="/price" element={<PriceList />} />
-            <Route path="/techniques" element={<TechniquesOnly />} />
-            <Route path="/techniques-list" element={<TechniquesList />} />
-            <Route path="/techniques/:id" element={<Techniques />} />
-            <Route path="/support/buying-guide" element={<BuyingGuide />} />
-            <Route path="/support/delivery-policy" element={<DeliveryPolicy />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/orders" element={<Orders />} />
-            <Route path="/orders/:id" element={<OrderDetail />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/checkout" element={<Checkout />} />
-            <Route path="/payment/success" element={<PaymentSuccess />} />
-            <Route path="/payment/cancel" element={<PaymentCancel />} />
-            <Route path="/support/warranty-policy" element={<WarrantyPolicy />} />
-            <Route path="/support/payment" element={<PaymentSupport />} />
-            <Route path="/admin/login" element={<AdminLogin />} />
-            <Route 
-              path="/admin/dashboard" 
-              element={
-                <ProtectedRoute>
-                  <AdminDashboard />
-                </ProtectedRoute>
-              } 
-            />
-          </Routes>
-        </main>
-        <Footer />
-        <Chatbot />
+        <Routes>
+          {/* Admin routes - không có Header/Footer */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route 
+            path="/admin/dashboard" 
+            element={
+              <ProtectedRoute>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          
+          {/* Public routes - có Header/Footer */}
+          <Route path="/*" element={
+            <>
+              <Header />
+              <main className="main-content">
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/products" element={<Products />} />
+                  <Route path="/products/:id" element={<ProductDetail />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/projects" element={<Projects />} />
+                  <Route path="/projects/:id" element={<ProjectDetail />} />
+                  <Route path="/commitment" element={<Commitment />} />
+                  <Route path="/price" element={<PriceList />} />
+                  <Route path="/techniques" element={<TechniquesOnly />} />
+                  <Route path="/techniques-list" element={<TechniquesList />} />
+                  <Route path="/techniques/:id" element={<Techniques />} />
+                  <Route path="/support/buying-guide" element={<BuyingGuide />} />
+                  <Route path="/support/delivery-policy" element={<DeliveryPolicy />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/orders" element={<Orders />} />
+                  <Route path="/orders/:id" element={<OrderDetail />} />
+                  <Route path="/cart" element={<Cart />} />
+                  <Route path="/checkout" element={<Checkout />} />
+                  <Route path="/payment/success" element={<PaymentSuccess />} />
+                  <Route path="/payment/cancel" element={<PaymentCancel />} />
+                  <Route path="/support/warranty-policy" element={<WarrantyPolicy />} />
+                  <Route path="/support/payment" element={<PaymentSupport />} />
+                </Routes>
+              </main>
+              <Footer />
+              <Chatbot />
+            </>
+          } />
+        </Routes>
         <ToastContainer
           position="top-right"
           autoClose={3000}

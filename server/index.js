@@ -10,6 +10,7 @@ const customerRoutes = require('./routes/customers');
 const orderRoutes = require('./routes/orders');
 const paymentRoutes = require('./routes/payment');
 const chatbotRoutes = require('./routes/chatbot');
+const adminRoutes = require('./routes/admin');
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -26,6 +27,7 @@ app.use('/api/customers', customerRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/chatbot', chatbotRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
