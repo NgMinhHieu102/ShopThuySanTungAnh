@@ -86,7 +86,6 @@ const Register = () => {
               <div className="form-group">
                 <label htmlFor="fullName">Họ và tên</label>
                 <div className="input-wrapper">
-                  <FaUser className="input-icon" />
                   <input
                     type="text"
                     id="fullName"
@@ -102,7 +101,6 @@ const Register = () => {
               <div className="form-group">
                 <label htmlFor="email">Email</label>
                 <div className="input-wrapper">
-                  <FaEnvelope className="input-icon" />
                   <input
                     type="email"
                     id="email"
@@ -120,7 +118,6 @@ const Register = () => {
               <div className="form-group">
                 <label htmlFor="phone">Số điện thoại</label>
                 <div className="input-wrapper">
-                  <FaPhone className="input-icon" />
                   <input
                     type="tel"
                     id="phone"
@@ -136,7 +133,6 @@ const Register = () => {
               <div className="form-group">
                 <label htmlFor="password">Mật khẩu</label>
                 <div className="input-wrapper">
-                  <FaLock className="input-icon" />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     id="password"
@@ -160,7 +156,6 @@ const Register = () => {
             <div className="form-group">
               <label htmlFor="confirmPassword">Xác nhận mật khẩu</label>
               <div className="input-wrapper">
-                <FaLock className="input-icon" />
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
                   id="confirmPassword"

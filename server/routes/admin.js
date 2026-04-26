@@ -1,19 +1,31 @@
 const express = require('express');
 const router = express.Router();
+const jwt = require('jsonwebtoken');
 const { db } = require('../database/db');
 
-// Middleware xác thực admin (đơn giản)
+const JWT_SECRET = process.env.JWT_SECRET || 'thuysan_tunganh_secret_key';
+
+// Middleware xác thực admin
 const authenticateAdmin = (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) {
     return res.status(401).json({ error: 'Không có quyền truy cập' });
   }
-  // TODO: Verify JWT token
-  next();
+  
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    if (decoded.role !== 'admin') {
+      return res.status(403).json({ error: 'Không có quyền admin' });
+    }
+    req.user = decoded;
+    next();
+  } catch (error) {
+    return res.status(401).json({ error: 'Token không hợp lệ' });
+  }
 };
 
 // GET - Thống kê tổng quan
-router.get('/stats', (req, res) => {
+router.get('/stats', authenticateAdmin, (req, res) => {
   const stats = {};
   
   // Tổng số đơn hàng
@@ -55,6 +67,52 @@ router.get('/revenue-by-month', (req, res) => {
       AND created_at >= date('now', '-12 months')
     GROUP BY month
     ORDER BY month ASC
+  `;
+  
+  db.all(query, [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
+});
+
+// GET - Doanh thu theo filter (ngày/tháng/năm)
+router.get('/revenue-by-period', authenticateAdmin, (req, res) => {
+  const { period = 'month', limit = 12 } = req.query;
+  
+  let dateFormat, dateRange, groupBy;
+  
+  switch (period) {
+    case 'day':
+      dateFormat = '%Y-%m-%d';
+      dateRange = `date('now', '-${limit} days')`;
+      groupBy = 'day';
+      break;
+    case 'month':
+      dateFormat = '%Y-%m';
+      dateRange = `date('now', '-${limit} months')`;
+      groupBy = 'month';
+      break;
+    case 'year':
+      dateFormat = '%Y';
+      dateRange = `date('now', '-${limit} years')`;
+      groupBy = 'year';
+      break;
+    default:
+      dateFormat = '%Y-%m';
+      dateRange = `date('now', '-12 months')`;
+      groupBy = 'month';
+  }
+  
+  const query = `
+    SELECT 
+      strftime('${dateFormat}', created_at) as ${groupBy},
+      SUM(total_amount) as revenue,
+      COUNT(*) as orders
+    FROM orders
+    WHERE status != 'cancelled'
+      AND created_at >= ${dateRange}
+    GROUP BY ${groupBy}
+    ORDER BY ${groupBy} ASC
   `;
   
   db.all(query, [], (err, rows) => {
@@ -107,8 +165,50 @@ router.get('/recent-orders', (req, res) => {
   });
 });
 
+// GET - Chi tiết đơn hàng
+router.get('/orders/:id', authenticateAdmin, (req, res) => {
+  const { id } = req.params;
+  
+  // Lấy thông tin đơn hàng
+  db.get(
+    `SELECT 
+      o.*,
+      c.full_name as customer_name,
+      c.email as customer_email,
+      c.phone as customer_phone
+    FROM orders o
+    LEFT JOIN customers c ON o.customer_id = c.id
+    WHERE o.id = ?`,
+    [id],
+    (err, order) => {
+      if (err) return res.status(500).json({ error: err.message });
+      if (!order) return res.status(404).json({ error: 'Không tìm thấy đơn hàng' });
+      
+      // Lấy chi tiết sản phẩm trong đơn hàng
+      db.all(
+        `SELECT 
+          oi.*,
+          p.name as product_name,
+          p.image_url
+        FROM order_items oi
+        LEFT JOIN products p ON oi.product_id = p.id
+        WHERE oi.order_id = ?`,
+        [id],
+        (err, items) => {
+          if (err) return res.status(500).json({ error: err.message });
+          
+          res.json({
+            ...order,
+            items: items
+          });
+        }
+      );
+    }
+  );
+});
+
 // GET - Danh sách tất cả đơn hàng
-router.get('/orders', (req, res) => {
+router.get('/orders', authenticateAdmin, (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 20;
   const offset = (page - 1) * limit;
@@ -164,7 +264,7 @@ router.get('/orders', (req, res) => {
 });
 
 // PUT - Cập nhật trạng thái đơn hàng
-router.put('/orders/:id/status', (req, res) => {
+router.put('/orders/:id/status', authenticateAdmin, (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
   
@@ -217,16 +317,63 @@ router.get('/products', (req, res) => {
   });
 });
 
+// POST - Thêm sản phẩm mới
+router.post('/products', (req, res) => {
+  const { 
+    name, category_id, price, size, description, image_url, stock_quantity,
+    scientific_name, breeding_model, economic_value, key_features, food,
+    breeding_time, difficulty, suitable_for, detailed_description
+  } = req.body;
+  
+  if (!name || !category_id || !price) {
+    return res.status(400).json({ error: 'Vui lòng nhập đầy đủ thông tin' });
+  }
+  
+  db.run(
+    `INSERT INTO products (
+      name, category_id, price, size, description, image_url, stock_quantity, is_available,
+      scientific_name, breeding_model, economic_value, key_features, food,
+      breeding_time, difficulty, suitable_for, detailed_description
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      name, category_id, price, size, description, image_url, stock_quantity || 0,
+      scientific_name, breeding_model, economic_value, key_features, food,
+      breeding_time, difficulty, suitable_for, detailed_description
+    ],
+    function(err) {
+      if (err) return res.status(500).json({ error: err.message });
+      res.status(201).json({ 
+        message: 'Thêm sản phẩm thành công',
+        productId: this.lastID 
+      });
+    }
+  );
+});
+
 // PUT - Cập nhật sản phẩm
 router.put('/products/:id', (req, res) => {
   const { id } = req.params;
-  const { name, price, stock_quantity, is_available } = req.body;
+  const { 
+    name, price, stock_quantity, is_available,
+    scientific_name, breeding_model, economic_value, key_features, food,
+    breeding_time, difficulty, suitable_for, detailed_description,
+    size, description, image_url, category_id
+  } = req.body;
   
   db.run(
-    `UPDATE products 
-     SET name = ?, price = ?, stock_quantity = ?, is_available = ?, updated_at = CURRENT_TIMESTAMP 
+    `UPDATE products SET 
+      name = ?, price = ?, stock_quantity = ?, is_available = ?,
+      scientific_name = ?, breeding_model = ?, economic_value = ?, key_features = ?,
+      food = ?, breeding_time = ?, difficulty = ?, suitable_for = ?,
+      detailed_description = ?, size = ?, description = ?, image_url = ?,
+      category_id = ?, updated_at = CURRENT_TIMESTAMP 
      WHERE id = ?`,
-    [name, price, stock_quantity, is_available, id],
+    [
+      name, price, stock_quantity, is_available,
+      scientific_name, breeding_model, economic_value, key_features,
+      food, breeding_time, difficulty, suitable_for,
+      detailed_description, size, description, image_url, category_id, id
+    ],
     function(err) {
       if (err) return res.status(500).json({ error: err.message });
       if (this.changes === 0) {
@@ -279,6 +426,116 @@ router.get('/customers', (req, res) => {
         page,
         totalPages: Math.ceil(countRow.total / limit)
       });
+    });
+  });
+});
+
+// DELETE - Xóa khách hàng
+router.delete('/customers/:id', (req, res) => {
+  const { id } = req.params;
+  
+  // Kiểm tra xem khách hàng có đơn hàng không
+  db.get('SELECT COUNT(*) as count FROM orders WHERE customer_id = ?', [id], (err, row) => {
+    if (err) return res.status(500).json({ error: err.message });
+    
+    if (row.count > 0) {
+      return res.status(400).json({ error: 'Không thể xóa khách hàng đã có đơn hàng' });
+    }
+    
+    db.run('DELETE FROM customers WHERE id = ?', [id], function(err) {
+      if (err) return res.status(500).json({ error: err.message });
+      if (this.changes === 0) {
+        return res.status(404).json({ error: 'Không tìm thấy khách hàng' });
+      }
+      res.json({ message: 'Xóa khách hàng thành công' });
+    });
+  });
+});
+
+// DELETE - Xóa đơn hàng
+router.delete('/orders/:id', (req, res) => {
+  const { id } = req.params;
+  
+  // Xóa order items trước
+  db.run('DELETE FROM order_items WHERE order_id = ?', [id], (err) => {
+    if (err) return res.status(500).json({ error: err.message });
+    
+    // Sau đó xóa order
+    db.run('DELETE FROM orders WHERE id = ?', [id], function(err) {
+      if (err) return res.status(500).json({ error: err.message });
+      if (this.changes === 0) {
+        return res.status(404).json({ error: 'Không tìm thấy đơn hàng' });
+      }
+      res.json({ message: 'Xóa đơn hàng thành công' });
+    });
+  });
+});
+
+// GET - Danh sách categories
+router.get('/categories', (req, res) => {
+  db.all('SELECT * FROM categories ORDER BY name', [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
+});
+
+// POST - Thêm category mới
+router.post('/categories', (req, res) => {
+  const { name, description } = req.body;
+  
+  if (!name) {
+    return res.status(400).json({ error: 'Vui lòng nhập tên danh mục' });
+  }
+  
+  db.run(
+    'INSERT INTO categories (name, description) VALUES (?, ?)',
+    [name, description],
+    function(err) {
+      if (err) return res.status(500).json({ error: err.message });
+      res.status(201).json({ 
+        message: 'Thêm danh mục thành công',
+        categoryId: this.lastID 
+      });
+    }
+  );
+});
+
+// PUT - Cập nhật category
+router.put('/categories/:id', (req, res) => {
+  const { id } = req.params;
+  const { name, description } = req.body;
+  
+  db.run(
+    'UPDATE categories SET name = ?, description = ? WHERE id = ?',
+    [name, description, id],
+    function(err) {
+      if (err) return res.status(500).json({ error: err.message });
+      if (this.changes === 0) {
+        return res.status(404).json({ error: 'Không tìm thấy danh mục' });
+      }
+      res.json({ message: 'Cập nhật danh mục thành công' });
+    }
+  );
+});
+
+// DELETE - Xóa category
+router.delete('/categories/:id', (req, res) => {
+  const { id } = req.params;
+  
+  // Kiểm tra xem có sản phẩm nào thuộc category này không
+  db.get('SELECT COUNT(*) as count FROM products WHERE category_id = ?', [id], (err, row) => {
+    if (err) return res.status(500).json({ error: err.message });
+    
+    if (row.count > 0) {
+      return res.status(400).json({ error: 'Không thể xóa danh mục đang có sản phẩm' });
+    }
+    
+    db.run('DELETE FROM categories WHERE id = ?', [id], function(err) {
+      if (err) return res.status(500).json({ error: err.message });
+      if (this.changes === 0) {
+        return res.status(404).json({ error: 'Không tìm thấy danh mục' });
+      }
+      res.json({ message: 'Xóa danh mục thành công' });
     });
   });
 });

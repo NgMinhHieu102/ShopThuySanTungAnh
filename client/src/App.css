@@ -19,7 +19,12 @@ body {
 
 .main-content {
   flex: 1;
-  padding-top: 140px; /* Tăng padding để tránh bị header che */
+  padding-top: 140px; /* Default padding for all pages */
+}
+
+/* Home page has no padding to allow full-screen banner */
+.main-content.home-content {
+  padding-top: 0;
 }
 
 .container {
@@ -157,20 +162,69 @@ body {
 /* Responsive */
 @media (max-width: 768px) {
   .container {
-    padding: 0 15px;
+    padding: 0 20px;
   }
   
   .main-content {
-    padding-top: 70px;
+    padding-top: 80px; /* Match header height */
+  }
+  
+  .main-content.home-content {
+    padding-top: 0;
   }
   
   .btn {
-    padding: 10px 20px;
+    padding: 12px 20px;
     font-size: 14px;
+    width: 100%; /* Full width buttons on mobile */
+    text-align: center;
   }
   
   .card-body {
     padding: 15px;
+  }
+  
+  /* Better grid for mobile */
+  .grid-2, .grid-3, .grid-4 {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 15px;
+  }
+  
+  .main-content {
+    padding-top: 70px; /* Match smaller header */
+  }
+  
+  .main-content.home-content {
+    padding-top: 0;
+  }
+  
+  .btn {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+  
+  .card {
+    margin-bottom: 15px;
+  }
+  
+  .card-body {
+    padding: 12px;
+  }
+  
+  /* Typography adjustments */
+  h1 { font-size: 1.8rem; }
+  h2 { font-size: 1.5rem; }
+  h3 { font-size: 1.3rem; }
+  
+  .form-control {
+    padding: 10px;
+    font-size: 16px; /* Prevent zoom on iOS */
   }
 }
 

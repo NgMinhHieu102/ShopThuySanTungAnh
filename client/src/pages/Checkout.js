@@ -90,7 +90,8 @@ const Checkout = () => {
         })),
         shipping_address: formData.address,
         phone: formData.phone,
-        notes: formData.notes
+        notes: formData.notes,
+        payment_method: paymentMethod
       };
 
       // Tạo đơn hàng

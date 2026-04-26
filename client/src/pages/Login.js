@@ -29,11 +29,31 @@ const Login = () => {
     setError('');
 
     try {
-      const response = await axios.post('/api/auth/customer/login', formData);
+      // Kiểm tra xem có phải admin login không (nếu nhập username thay vì email)
+      const isAdminLogin = !formData.email.includes('@');
+      
+      let response;
+      if (isAdminLogin) {
+        // Đăng nhập admin
+        response = await axios.post('/api/auth/login', {
+          username: formData.email,
+          password: formData.password
+        });
+      } else {
+        // Đăng nhập khách hàng
+        response = await axios.post('/api/auth/customer/login', formData);
+      }
       
       // Lưu token và thông tin user vào localStorage
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+      if (isAdminLogin && response.data.user.role === 'admin') {
+        // Lưu token admin riêng
+        localStorage.setItem('adminToken', response.data.token);
+        localStorage.setItem('adminUser', JSON.stringify(response.data.user));
+      } else {
+        // Lưu token user thông thường
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+      }
       
       // Dispatch custom event to notify Header component
       window.dispatchEvent(new Event('authChange'));
@@ -41,9 +61,13 @@ const Login = () => {
       toast.success('Đăng nhập thành công!');
       setLoading(false);
       
-      // Chuyển về trang chủ sau 500ms
+      // Chuyển hướng dựa vào role
       setTimeout(() => {
-        navigate('/');
+        if (response.data.user.role === 'admin') {
+          navigate('/admin/dashboard');
+        } else {
+          navigate('/');
+        }
       }, 500);
     } catch (err) {
       setLoading(false);
@@ -68,16 +92,15 @@ const Login = () => {
 
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="form-group">
-              <label htmlFor="email">Email</label>
+              <label htmlFor="email">Email hoặc Username</label>
               <div className="input-wrapper">
-                <FaUser className="input-icon" />
                 <input
-                  type="email"
+                  type="text"
                   id="email"
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="Nhập email của bạn"
+                  placeholder="Nhập email hoặc username"
                   required
                 />
               </div>
@@ -86,7 +109,6 @@ const Login = () => {
             <div className="form-group">
               <label htmlFor="password">Mật khẩu</label>
               <div className="input-wrapper">
-                <FaLock className="input-icon" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   id="password"

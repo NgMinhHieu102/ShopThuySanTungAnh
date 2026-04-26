@@ -4,6 +4,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import Header from './components/Header';
+import MobileHeader from './components/MobileHeader';
 import Footer from './components/Footer';
 import Chatbot from './components/Chatbot';
 import Home from './pages/Home';
@@ -31,11 +32,12 @@ import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import PaymentSuccess from './pages/PaymentSuccess';
 import PaymentCancel from './pages/PaymentCancel';
-import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
+import AdminProtectedRoute from './components/AdminProtectedRoute';
 
 import './App.css';
+import './responsive.css';
 
 function App() {
   return (
@@ -43,13 +45,12 @@ function App() {
       <div className="App">
         <Routes>
           {/* Admin routes - không có Header/Footer */}
-          <Route path="/admin/login" element={<AdminLogin />} />
           <Route 
             path="/admin/dashboard" 
             element={
-              <ProtectedRoute>
+              <AdminProtectedRoute>
                 <AdminDashboard />
-              </ProtectedRoute>
+              </AdminProtectedRoute>
             } 
           />
           
@@ -57,35 +58,44 @@ function App() {
           <Route path="/*" element={
             <>
               <Header />
-              <main className="main-content">
-                <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/products" element={<Products />} />
-                  <Route path="/products/:id" element={<ProductDetail />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/contact" element={<Contact />} />
-                  <Route path="/projects" element={<Projects />} />
-                  <Route path="/projects/:id" element={<ProjectDetail />} />
-                  <Route path="/commitment" element={<Commitment />} />
-                  <Route path="/price" element={<PriceList />} />
-                  <Route path="/techniques" element={<TechniquesOnly />} />
-                  <Route path="/techniques-list" element={<TechniquesList />} />
-                  <Route path="/techniques/:id" element={<Techniques />} />
-                  <Route path="/support/buying-guide" element={<BuyingGuide />} />
-                  <Route path="/support/delivery-policy" element={<DeliveryPolicy />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/register" element={<Register />} />
-                  <Route path="/profile" element={<Profile />} />
-                  <Route path="/orders" element={<Orders />} />
-                  <Route path="/orders/:id" element={<OrderDetail />} />
-                  <Route path="/cart" element={<Cart />} />
-                  <Route path="/checkout" element={<Checkout />} />
-                  <Route path="/payment/success" element={<PaymentSuccess />} />
-                  <Route path="/payment/cancel" element={<PaymentCancel />} />
-                  <Route path="/support/warranty-policy" element={<WarrantyPolicy />} />
-                  <Route path="/support/payment" element={<PaymentSupport />} />
-                </Routes>
-              </main>
+              <MobileHeader />
+              <Routes>
+                <Route path="/" element={
+                  <main className="main-content home-content">
+                    <Home />
+                  </main>
+                } />
+                <Route path="/*" element={
+                  <main className="main-content">
+                    <Routes>
+                      <Route path="/products" element={<Products />} />
+                      <Route path="/products/:id" element={<ProductDetail />} />
+                      <Route path="/about" element={<About />} />
+                      <Route path="/contact" element={<Contact />} />
+                      <Route path="/projects" element={<Projects />} />
+                      <Route path="/projects/:id" element={<ProjectDetail />} />
+                      <Route path="/commitment" element={<Commitment />} />
+                      <Route path="/price" element={<PriceList />} />
+                      <Route path="/techniques" element={<TechniquesOnly />} />
+                      <Route path="/techniques-list" element={<TechniquesList />} />
+                      <Route path="/techniques/:id" element={<Techniques />} />
+                      <Route path="/support/buying-guide" element={<BuyingGuide />} />
+                      <Route path="/support/delivery-policy" element={<DeliveryPolicy />} />
+                      <Route path="/login" element={<Login />} />
+                      <Route path="/register" element={<Register />} />
+                      <Route path="/profile" element={<Profile />} />
+                      <Route path="/orders" element={<Orders />} />
+                      <Route path="/orders/:id" element={<OrderDetail />} />
+                      <Route path="/cart" element={<Cart />} />
+                      <Route path="/checkout" element={<Checkout />} />
+                      <Route path="/payment/success" element={<PaymentSuccess />} />
+                      <Route path="/payment/cancel" element={<PaymentCancel />} />
+                      <Route path="/support/warranty-policy" element={<WarrantyPolicy />} />
+                      <Route path="/support/payment" element={<PaymentSupport />} />
+                    </Routes>
+                  </main>
+                } />
+              </Routes>
               <Footer />
               <Chatbot />
             </>

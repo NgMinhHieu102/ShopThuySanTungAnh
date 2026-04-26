@@ -194,6 +194,11 @@ const Header = () => {
               </div>
               <button className="order-btn">ĐẶT HÀNG NHANH</button>
             </div>
+
+            {/* Mobile Menu Toggle - Only show on mobile */}
+            <button className="menu-toggle" onClick={toggleMenu}>
+              <FaBars />
+            </button>
           </div>
         </div>
       </div>
@@ -202,6 +207,9 @@ const Header = () => {
       <div className="main-nav">
         <div className="container">
           <nav className={`nav ${isMenuOpen ? 'nav-open' : ''}`}>
+            {isMenuOpen && (
+              <div className="mobile-menu-backdrop" onClick={() => setIsMenuOpen(false)}></div>
+            )}
             <ul className="nav-list">
               <li><Link to="/" onClick={() => setIsMenuOpen(false)}>TRANG CHỦ</Link></li>
               
@@ -335,10 +343,6 @@ const Header = () => {
               </li>
             </ul>
           </nav>
-
-          <button className="menu-toggle" onClick={toggleMenu}>
-            {isMenuOpen ? <FaTimes /> : <FaBars />}
-          </button>
         </div>
       </div>
     </header>

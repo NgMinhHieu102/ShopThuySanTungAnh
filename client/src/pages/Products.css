@@ -319,9 +319,35 @@
 }
 
 @media (max-width: 768px) {
+  .products-page {
+    padding: 100px 0 1rem;
+  }
+  
+  .page-header h1 {
+    font-size: 1.8rem;
+  }
+  
+  .page-header p {
+    font-size: 1rem;
+  }
+  
+  .filter-bar {
+    flex-direction: column;
+    gap: 15px;
+    align-items: stretch;
+    padding: 15px 0;
+  }
+  
+  .filter-left,
+  .filter-right {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
   .products-controls {
     flex-direction: column;
     align-items: stretch;
+    gap: 15px;
   }
   
   .search-form {
@@ -330,9 +356,127 @@
   
   .search-input input {
     width: 100%;
+    padding: 12px 15px;
+    font-size: 16px;
   }
   
   .category-filters {
     justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .category-btn {
+    padding: 8px 16px;
+    font-size: 14px;
+    min-width: auto;
+  }
+  
+  .products-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+  
+  .product-card {
+    border-radius: 12px;
+  }
+  
+  .product-image {
+    height: 150px;
+  }
+  
+  .product-info {
+    padding: 12px;
+  }
+  
+  .product-info h3 {
+    font-size: 1rem;
+    margin-bottom: 8px;
+  }
+  
+  .product-category,
+  .product-size {
+    font-size: 0.85rem;
+  }
+  
+  .product-price {
+    font-size: 1rem;
+  }
+  
+  .btn-sm {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  
+  .pagination {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .pagination button {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .products-page {
+    padding: 80px 0 1rem;
+  }
+  
+  .page-header {
+    margin-bottom: 2rem;
+  }
+  
+  .page-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .page-header p {
+    font-size: 0.9rem;
+  }
+  
+  .filter-bar {
+    padding: 10px 0;
+  }
+  
+  .category-filters {
+    gap: 6px;
+  }
+  
+  .category-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  
+  .products-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .product-image {
+    height: 180px;
+  }
+  
+  .product-info {
+    padding: 10px;
+  }
+  
+  .product-info h3 {
+    font-size: 0.95rem;
+  }
+  
+  .product-category,
+  .product-size {
+    font-size: 0.8rem;
+  }
+  
+  .product-price {
+    font-size: 0.95rem;
+  }
+  
+  .btn-sm {
+    padding: 5px 10px;
+    font-size: 11px;
   }
 }

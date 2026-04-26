@@ -1,0 +1,250 @@
+/* Mobile-first optimizations */
+
+/* Touch-friendly interactions */
+@media (max-width: 768px) {
+  /* Increase touch targets */
+  button, .btn, a, input, select, textarea {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Better spacing for mobile */
+  .container {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+  
+  /* Prevent horizontal scroll */
+  body {
+    overflow-x: hidden;
+  }
+  
+  /* Better text readability */
+  body {
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  
+  /* Optimize images for mobile */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  /* Better form inputs */
+  input, textarea, select {
+    font-size: 16px; /* Prevent zoom on iOS */
+    padding: 12px;
+    border-radius: 8px;
+  }
+  
+  /* Stack elements vertically */
+  .mobile-stack {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 15px !important;
+  }
+  
+  /* Full width buttons on mobile */
+  .mobile-full-width {
+    width: 100% !important;
+    text-align: center !important;
+  }
+  
+  /* Hide elements on mobile */
+  .mobile-hide {
+    display: none !important;
+  }
+  
+  /* Show only on mobile */
+  .mobile-only {
+    display: block !important;
+  }
+}
+
+/* Desktop hide mobile elements */
+@media (min-width: 769px) {
+  .mobile-only {
+    display: none !important;
+  }
+}
+
+/* Smooth scrolling for mobile */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Better mobile navigation */
+@media (max-width: 768px) {
+  .nav-list {
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+  
+  /* Mobile-friendly dropdowns */
+  .dropdown-menu {
+    position: static !important;
+    transform: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+  }
+  
+  /* Better mobile cards */
+  .card {
+    margin-bottom: 15px;
+    border-radius: 12px;
+  }
+  
+  .card-body {
+    padding: 15px;
+  }
+  
+  /* Mobile-optimized grids */
+  .grid, .grid-2, .grid-3, .grid-4 {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 15px !important;
+  }
+  
+  /* Better mobile typography */
+  h1 { font-size: 1.8rem !important; }
+  h2 { font-size: 1.5rem !important; }
+  h3 { font-size: 1.3rem !important; }
+  h4 { font-size: 1.1rem !important; }
+  h5 { font-size: 1rem !important; }
+  h6 { font-size: 0.9rem !important; }
+  
+  /* Mobile-friendly tables */
+  table {
+    font-size: 14px;
+  }
+  
+  th, td {
+    padding: 8px 4px;
+  }
+  
+  /* Better mobile modals */
+  .modal-content {
+    margin: 10px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  
+  /* Mobile-optimized search */
+  .search-input {
+    font-size: 16px !important;
+    padding: 12px 15px !important;
+  }
+  
+  .search-dropdown {
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  
+  .search-dropdown-item {
+    padding: 15px;
+  }
+  
+  /* Better mobile footer */
+  .footer {
+    padding: 30px 0;
+  }
+  
+  .footer-content {
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+  }
+}
+
+/* Extra small devices */
+@media (max-width: 480px) {
+  .container {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  
+  /* Smaller buttons for very small screens */
+  .btn {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+  
+  /* Compact cards */
+  .card-body {
+    padding: 12px;
+  }
+  
+  /* Smaller typography */
+  h1 { font-size: 1.6rem !important; }
+  h2 { font-size: 1.4rem !important; }
+  h3 { font-size: 1.2rem !important; }
+  
+  /* Compact navigation */
+  .nav-list a {
+    padding: 12px 15px;
+    font-size: 14px;
+  }
+  
+  /* Smaller search */
+  .search-input {
+    padding: 10px 12px !important;
+    font-size: 14px !important;
+  }
+}
+
+/* Landscape orientation adjustments */
+@media (max-width: 768px) and (orientation: landscape) {
+  .hero-banner {
+    min-height: 50vh;
+  }
+  
+  .main-content {
+    padding-top: 80px;
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  /* Optimize for retina displays */
+  .logo-img {
+    image-rendering: -webkit-optimize-contrast;
+  }
+}
+
+/* Dark mode support for mobile */
+@media (prefers-color-scheme: dark) and (max-width: 768px) {
+  .card {
+    background: #2d3748;
+    color: white;
+  }
+  
+  .form-control {
+    background: #4a5568;
+    border-color: #718096;
+    color: white;
+  }
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Print styles for mobile */
+@media print {
+  .header, .footer, .nav, .btn {
+    display: none !important;
+  }
+  
+  .main-content {
+    padding-top: 0 !important;
+  }
+}

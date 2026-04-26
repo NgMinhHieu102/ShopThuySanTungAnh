@@ -112,7 +112,7 @@ router.get('/:id', authenticateToken, (req, res) => {
 
 // POST - Tạo đơn hàng mới
 router.post('/', authenticateToken, (req, res) => {
-  const { items, shipping_address, phone, notes } = req.body;
+  const { items, shipping_address, phone, notes, payment_method } = req.body;
   const customerId = req.user.id;
 
   if (!items || items.length === 0) {
@@ -127,9 +127,9 @@ router.post('/', authenticateToken, (req, res) => {
 
   // Tạo đơn hàng
   db.run(
-    `INSERT INTO orders (customer_id, total_amount, status, shipping_address, phone, notes) 
-     VALUES (?, ?, 'pending', ?, ?, ?)`,
-    [customerId, totalAmount, shipping_address, phone, notes],
+    `INSERT INTO orders (customer_id, total_amount, status, shipping_address, phone, notes, payment_method) 
+     VALUES (?, ?, 'pending', ?, ?, ?, ?)`,
+    [customerId, totalAmount, shipping_address, phone, notes, payment_method || 'cod'],
     function(err) {
       if (err) {
         return res.status(500).json({ error: 'Lỗi tạo đơn hàng' });
