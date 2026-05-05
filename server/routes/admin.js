@@ -28,13 +28,18 @@ const authenticateAdmin = (req, res, next) => {
 router.get('/stats', authenticateAdmin, (req, res) => {
   const stats = {};
   
-  // Tổng số đơn hàng
-  db.get('SELECT COUNT(*) as total FROM orders', (err, row) => {
+  // Tổng số đơn hàng (chỉ tính COD hoặc PayOS đã thanh toán)
+  db.get(`SELECT COUNT(*) as total FROM orders 
+          WHERE (payment_method = 'cod' OR (payment_method = 'payos' AND payment_status = 'paid'))`, 
+  (err, row) => {
     if (err) return res.status(500).json({ error: err.message });
     stats.totalOrders = row.total;
     
-    // Tổng doanh thu
-    db.get('SELECT SUM(total_amount) as total FROM orders WHERE status != "cancelled"', (err, row) => {
+    // Tổng doanh thu (chỉ tính COD hoặc PayOS đã thanh toán, không tính đơn hủy)
+    db.get(`SELECT SUM(total_amount) as total FROM orders 
+            WHERE status != "cancelled" 
+            AND (payment_method = 'cod' OR (payment_method = 'payos' AND payment_status = 'paid'))`, 
+    (err, row) => {
       if (err) return res.status(500).json({ error: err.message });
       stats.totalRevenue = row.total || 0;
       
@@ -64,6 +69,7 @@ router.get('/revenue-by-month', (req, res) => {
       COUNT(*) as orders
     FROM orders
     WHERE status != 'cancelled'
+      AND (payment_method = 'cod' OR (payment_method = 'payos' AND payment_status = 'paid'))
       AND created_at >= date('now', '-12 months')
     GROUP BY month
     ORDER BY month ASC
@@ -110,6 +116,7 @@ router.get('/revenue-by-period', authenticateAdmin, (req, res) => {
       COUNT(*) as orders
     FROM orders
     WHERE status != 'cancelled'
+      AND (payment_method = 'cod' OR (payment_method = 'payos' AND payment_status = 'paid'))
       AND created_at >= ${dateRange}
     GROUP BY ${groupBy}
     ORDER BY ${groupBy} ASC
@@ -134,6 +141,7 @@ router.get('/top-products', (req, res) => {
     JOIN order_items oi ON p.id = oi.product_id
     JOIN orders o ON oi.order_id = o.id
     WHERE o.status != 'cancelled'
+      AND (o.payment_method = 'cod' OR (o.payment_method = 'payos' AND o.payment_status = 'paid'))
     GROUP BY p.id
     ORDER BY total_sold DESC
     LIMIT 10
@@ -155,6 +163,7 @@ router.get('/recent-orders', (req, res) => {
       c.email as customer_email
     FROM orders o
     LEFT JOIN customers c ON o.customer_id = c.id
+    WHERE (o.payment_method = 'cod' OR (o.payment_method = 'payos' AND o.payment_status = 'paid'))
     ORDER BY o.created_at DESC
     LIMIT ?
   `;
@@ -222,11 +231,12 @@ router.get('/orders', authenticateAdmin, (req, res) => {
       c.phone as customer_phone
     FROM orders o
     LEFT JOIN customers c ON o.customer_id = c.id
+    WHERE (o.payment_method = 'cod' OR (o.payment_method = 'payos' AND o.payment_status = 'paid'))
   `;
   
   const params = [];
   if (status) {
-    query += ' WHERE o.status = ?';
+    query += ' AND o.status = ?';
     params.push(status);
   }
   
@@ -237,9 +247,10 @@ router.get('/orders', authenticateAdmin, (req, res) => {
     if (err) return res.status(500).json({ error: err.message });
     
     // Đếm tổng số
-    let countQuery = 'SELECT COUNT(*) as total FROM orders';
+    let countQuery = `SELECT COUNT(*) as total FROM orders 
+                      WHERE (payment_method = 'cod' OR (payment_method = 'payos' AND payment_status = 'paid'))`;
     if (status) {
-      countQuery += ' WHERE status = ?';
+      countQuery += ' AND status = ?';
       db.get(countQuery, [status], (err, countRow) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json({
