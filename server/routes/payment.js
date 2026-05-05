@@ -40,10 +40,13 @@ router.post('/create-payment-link', authenticateToken, async (req, res) => {
     }
 
     // Tạo payment link với PayOS v2 API
+    // PayOS yêu cầu description tối đa 25 ký tự
+    const defaultDescription = `DH ${orderId}`.substring(0, 25);
+    
     const paymentData = {
       orderCode: Number(orderId),
       amount: Number(amount),
-      description: description || `Thanh toán đơn hàng #${orderId}`,
+      description: description ? description.substring(0, 25) : defaultDescription,
       returnUrl: returnUrl || `${process.env.CLIENT_URL || 'http://localhost:3000'}/payment/success`,
       cancelUrl: cancelUrl || `${process.env.CLIENT_URL || 'http://localhost:3000'}/payment/cancel`,
     };
