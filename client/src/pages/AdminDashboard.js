@@ -362,6 +362,22 @@ const AdminDashboard = () => {
     return texts[method] || method;
   };
 
+  const getPaymentStatusText = (status) => {
+    const texts = {
+      pending: 'Chưa thanh toán',
+      paid: 'Đã thanh toán'
+    };
+    return texts[status] || status;
+  };
+
+  const getPaymentStatusColor = (status) => {
+    const colors = {
+      pending: '#ffc107',
+      paid: '#28a745'
+    };
+    return colors[status] || '#6c757d';
+  };
+
   const formatDateLabel = (dateString, period) => {
     if (!dateString) return '';
     
@@ -625,6 +641,7 @@ const AdminDashboard = () => {
                     <th>SĐT</th>
                     <th>Tổng tiền</th>
                     <th>Phương thức TT</th>
+                    <th>TT Thanh toán</th>
                     <th>Trạng thái</th>
                     <th>Ngày đặt</th>
                     <th>Thao tác</th>
@@ -640,6 +657,14 @@ const AdminDashboard = () => {
                       <td>
                         <span className={`payment-method-badge ${order.payment_method}`}>
                           {getPaymentMethodText(order.payment_method)}
+                        </span>
+                      </td>
+                      <td>
+                        <span 
+                          className="status-badge" 
+                          style={{ background: getPaymentStatusColor(order.payment_status) }}
+                        >
+                          {getPaymentStatusText(order.payment_status)}
                         </span>
                       </td>
                       <td>
@@ -1028,7 +1053,15 @@ const AdminDashboard = () => {
                     {getPaymentMethodText(selectedOrder.payment_method)}
                   </span>
                 </p>
-                <p><strong>Trạng thái:</strong> 
+                <p><strong>Trạng thái thanh toán:</strong> 
+                  <span 
+                    className="status-badge" 
+                    style={{ background: getPaymentStatusColor(selectedOrder.payment_status), marginLeft: '10px' }}
+                  >
+                    {getPaymentStatusText(selectedOrder.payment_status)}
+                  </span>
+                </p>
+                <p><strong>Trạng thái đơn hàng:</strong> 
                   <span 
                     className="status-badge" 
                     style={{ background: getStatusColor(selectedOrder.status), marginLeft: '10px' }}
